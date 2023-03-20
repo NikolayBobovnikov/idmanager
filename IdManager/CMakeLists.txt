@@ -12,7 +12,7 @@ endif()
 project ("IdManager")
 
 # Add source to this project's executable.
-add_executable (IdManager "IdManager.cpp" "IdManager.h")
+add_executable (IdManager "SequenceId.cpp" "SequenceId.h"  "IId.h" "main.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET IdManager PROPERTY CXX_STANDARD 20)
