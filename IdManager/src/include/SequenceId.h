@@ -36,14 +36,16 @@ namespace {
 namespace SequenceId {
   using std::string;
 
-  class SequenceId {
+
+  class Id{
   public:
-    SequenceId(); // default
-    SequenceId(const string& id); // implicit
+    Id(); // default
+    Id(const string& id); // implicit
 
-    virtual SequenceId& operator=(SequenceId&) = 0;
+    Id& set(const string&);
+    Id& next();
 
-    virtual SequenceId& operator++() = 0;
+    operator string() const;
 
   private:
     std::string _id;

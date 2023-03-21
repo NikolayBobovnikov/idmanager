@@ -69,14 +69,31 @@ namespace SequenceId {
 }
 
 namespace SequenceId {
-  SequenceId::SequenceId()
+  Id::Id()
     : _id("A1")
   {
   }
 
-  SequenceId::SequenceId(const string& id)
+  Id::Id(const string& id)
     : _id(id)
   {
+  }
+
+  Id& Id::set(const string& s)
+  {
+    // TODO: insert return statement here
+    return *this;
+  }
+
+  Id& Id::next()
+  {
+    // TODO: insert return statement here
+    return *this;
+  }
+
+  Id::operator string() const
+  {
+    return _id;
   }
 
 }
