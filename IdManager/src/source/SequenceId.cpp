@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iterator>
 #include <cassert>
+#include <limits>
 #include "SequenceId.h"
 
 namespace
@@ -213,6 +214,22 @@ namespace SequenceId
           end(_groups),
           [&](const Group &g)
           { return g.is_max(); });
+    }
+
+    template <size_t N>
+    constexpr uint8_t indexof(char ch, const array<char, N> where) noexcept
+    {
+      static_assert((N < std::numeric_limits<uint8_t>::max()));
+      assert(find(begin(where), end(where), ch) != end(where));
+
+      return static_cast<uint8_t>(distance(where.begin(), find(begin(where), end(where), ch)));
+    }
+
+    uint8_t indexof(char ch, const string_view where) noexcept
+    {
+      assert(where.find(ch) != string_view::npos);
+
+      return static_cast<uint8_t>(where.find(ch));
     }
 
     vector<Group> _groups;
