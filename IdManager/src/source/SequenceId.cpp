@@ -115,7 +115,7 @@ namespace SequenceId
         }
 
         // after data is validated, add group with positions of char and digit to the identifier
-        _groups.emplace_back(indexof(current_char, s_chars), indexof(current_digit, s_digits));
+        _groups.emplace_back(indexof_char(current_char), indexof_digit(current_digit));
       }
     }
 
@@ -221,20 +221,14 @@ namespace SequenceId
           { return g.is_max(); });
     }
 
-    template <size_t N>
-    constexpr uint8_t indexof(char ch, const array<char, N> where) noexcept
+    uint8_t indexof_char(char ch) noexcept
     {
-      static_assert((N < std::numeric_limits<uint8_t>::max()));
-      assert(find(begin(where), end(where), ch) != end(where));
-
-      return static_cast<uint8_t>(distance(where.begin(), find(begin(where), end(where), ch)));
+      return static_cast<uint8_t>(distance(s_chars.begin(), find(s_chars.begin(), s_chars.end(), ch)));
     }
 
-    uint8_t indexof(char ch, const string_view where) noexcept
+    constexpr uint8_t indexof_digit(char ch) noexcept
     {
-      assert(where.find(ch) != string_view::npos);
-
-      return static_cast<uint8_t>(where.find(ch));
+      return static_cast<uint8_t>(s_digits.find(ch));
     }
 
     vector<Group> _groups;
