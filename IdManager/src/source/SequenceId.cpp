@@ -1,6 +1,11 @@
 ﻿// IdManager.cpp : Defines the entry point for the application.
 //
 
+#include <vector>
+#include <array>
+#include <string_view>
+#include <algorithm>
+#include <iterator>
 #include "SequenceId.h"
 
 namespace SequenceId
@@ -71,25 +76,29 @@ namespace SequenceId
 namespace SequenceId
 {
   using namespace std;
+  using std::array;
+  using std::string_view;
+  using std::vector;
 
   class Id::Impl
   {
   public:
     Impl()
-        : _id("A1")
     {
+      _id.reserve(MAX_GROUPS);
+      _id.emplace_back();
     }
 
     Impl(const Impl &) = default;
 
-    Impl(const string &id)
-        : _id(id)
+    Impl(string_view id)
     {
+      // TODO
     }
 
     Impl(const char *id)
-        : _id(id)
     {
+      // TODO
     }
 
     void set(const string &)
@@ -104,11 +113,37 @@ namespace SequenceId
 
     string get() const
     {
-      return "";
+      string result;
+      result.reserve(_id.size() * 3 - 1); // 3 elements (char,  digit, delimeter) per group
+
+      static const char delimeter = '-';
+      for (auto it = begin(_id); it != end(_id); ++it)
+      {
+        result.push_back(s_allowed_chars[it->index_char]);
+        result.push_back(s_digits[it->index_digit]);
+
+        if (std::next(it) != end(_id))
+        {
+          result.push_back(delimeter);
+        }
+      }
+
+      // remove last
+      result.pop_back();
+
+      return result;
     }
 
   private:
-    string _id;
+    static constexpr array<char, allowed_chars_dim> s_allowed_chars = generate_allowed_chars_array<allowed_chars_dim>();
+    static constexpr array<char, 9> s_digits = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    static constexpr size_t MAX_GROUPS = 10;
+    struct Group
+    {
+      uint8_t index_char = 0;
+      uint8_t index_digit = 0;
+    };
+    vector<Group> _id;
   };
 
   Id::Id()
