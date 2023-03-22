@@ -185,6 +185,11 @@ namespace SequenceId
       uint8_t char_index = 0;
       uint8_t digit_index = 0;
 
+      Group(uint8_t _char_index = 0, uint8_t _digit_index = 0)
+          : char_index(_char_index), digit_index(_digit_index)
+      {
+      }
+
       bool is_max() const noexcept
       {
         return char_index == s_last_char_index && digit_index == s_last_digit_index;
