@@ -8,20 +8,22 @@
 
 namespace
 {
-  using std::size_t;
   using std::array;
+  using std::size_t;
   using std::string_view;
 
   static constexpr string_view forbidden_chars = "DFGJMQV";
   static constexpr string_view all_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   static constexpr size_t allowed_size = all_chars.size() - forbidden_chars.size();
 
-  constexpr bool contains(char ch, const string_view where) noexcept {
+  constexpr bool contains(char ch, const string_view where) noexcept
+  {
     return string_view::npos != where.find(ch);
   }
 
   template <size_t N>
-  constexpr bool contains(char ch, const array<char, N> where) noexcept {
+  constexpr bool contains(char ch, const array<char, N> where) noexcept
+  {
     return end(where) != std::find(begin(where), end(where), ch);
   }
 
@@ -34,7 +36,8 @@ namespace
 
     while (curr < N)
     {
-      while (contains(all_chars[i], forbidden_chars)) {
+      while (contains(all_chars[i], forbidden_chars))
+      {
         ++i;
       }
       allowed_chars[curr++] = all_chars[i++];
@@ -49,9 +52,9 @@ namespace SequenceId
 {
   using namespace std;
   using std::array;
+  using std::exception;
   using std::string_view;
   using std::vector;
-  using std::exception;
 
   class Id::Impl
   {
@@ -76,18 +79,22 @@ namespace SequenceId
 
     void set(const string &id)
     {
-      for (auto it = begin(id); it != end(id); ++it) {
-        if (*it == s_delimeter) {
+      for (auto it = begin(id); it != end(id); ++it)
+      {
+        if (*it == s_delimeter)
+        {
           ++it;
         }
 
-        const auto& ch = *it;
-        if (!contains(ch, s_chars)) {
-          throw exception("Incorrect format of the identifier. Char is not allowed: " + ch);
+        const auto &ch = *it;
+        if (!contains(ch, s_chars))
+        {
+          throw invalid_argument("Incorrect format of the identifier. Char is not allowed: " + ch);
         }
 
-        if (!contains(ch, s_digits)) {
-          throw exception("Incorrect format of the identifier. Char is not allowed: " + ch);
+        if (!contains(ch, s_digits))
+        {
+          throw invalid_argument("Incorrect format of the identifier. Char is not allowed: " + ch);
         }
       }
     }
@@ -95,27 +102,30 @@ namespace SequenceId
     void advance()
     {
       // get rightmost grouch
-      auto& last_group = _groups.back();
+      auto &last_group = _groups.back();
 
       // if the rightmost group is not max, advance it
-      if (!last_group.is_max()) {
+      if (!last_group.is_max())
+      {
         last_group.advance();
       }
       else
       {
         // otherwise, try find first non max group
         auto first_nonmax_it = find_if(
-          begin(_groups),
-          end(_groups),
-          [&](const Group& g) { return g.is_max(); }
-        );
+            begin(_groups),
+            end(_groups),
+            [&](const Group &g)
+            { return g.is_max(); });
 
         // if found advance it
         // otherwise add new group at the back
-        if (first_nonmax_it != end(_groups)) {
+        if (first_nonmax_it != end(_groups))
+        {
           first_nonmax_it->advance();
         }
-        else {
+        else
+        {
           _groups.emplace_back();
         }
       }
@@ -169,26 +179,28 @@ namespace SequenceId
         {
           ++digit_index;
         }
-        else {
+        else
+        {
           ++char_index;
           digit_index = 0;
         }
       }
     };
 
-    auto find_first_nonmax() {
+    auto find_first_nonmax()
+    {
       return find_if(
-        begin(_groups), 
-        end(_groups), 
-        [&](const Group& g) { return g.is_max(); }
-      );
+          begin(_groups),
+          end(_groups),
+          [&](const Group &g)
+          { return g.is_max(); });
     }
 
     vector<Group> _groups;
   };
 }
 
-// main class 
+// main class
 namespace SequenceId
 {
   using namespace std;
@@ -197,26 +209,26 @@ namespace SequenceId
   using std::vector;
 
   Id::Id()
-    : _pimpl(make_unique<Impl>())
+      : _pimpl(make_unique<Impl>())
   {
   }
 
-  Id::Id(const string& id)
-    : _pimpl(make_unique<Impl>(id))
+  Id::Id(const string &id)
+      : _pimpl(make_unique<Impl>(id))
   {
   }
 
-  Id::Id(const char* id)
-    : _pimpl(make_unique<Impl>(id))
+  Id::Id(const char *id)
+      : _pimpl(make_unique<Impl>(id))
   {
   }
 
-  Id::Id(const Id& other)
-    : _pimpl(make_unique<Impl>(*other._pimpl))
+  Id::Id(const Id &other)
+      : _pimpl(make_unique<Impl>(*other._pimpl))
   {
   }
 
-  Id& Id::operator=(const Id& other)
+  Id &Id::operator=(const Id &other)
   {
     if (this == &other)
     {
@@ -229,13 +241,13 @@ namespace SequenceId
 
   Id::~Id() = default;
 
-  Id& Id::set(const string& s)
+  Id &Id::set(const string &s)
   {
     _pimpl->set(s);
     return *this;
   }
 
-  Id& Id::advance()
+  Id &Id::advance()
   {
     _pimpl->advance();
     return *this;
