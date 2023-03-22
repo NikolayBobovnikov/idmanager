@@ -22,7 +22,7 @@ namespace SequenceId
     Id &operator=(Id &&) = default;
 
     Id &set(const string &);
-    Id &next();
+    Id &advance();
     string get() const;
 
   private:

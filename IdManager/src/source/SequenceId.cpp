@@ -107,15 +107,14 @@ namespace SequenceId
       string result;
       result.reserve(_groups.size() * 3); // reserve for 3 elements (char,  digit, delimeter) per group
 
-      static const char delimeter = '-';
       for (auto it = begin(_groups); it != end(_groups); ++it)
       {
         result.push_back(s_chars[it->char_index]);
         result.push_back(s_digits[it->digit_index]);
 
-        if (std::next(it) != end(_groups))
+        if (next(it) != end(_groups))
         {
-          result.push_back(delimeter);
+          result.push_back(s_delimeter);
         }
       }
 
@@ -130,6 +129,8 @@ namespace SequenceId
     static const size_t s_last_char_index = s_chars.size() - 1;
     static const size_t s_last_digit_index = s_digits.size() - 1;
     static constexpr size_t s_max_groups = 10;
+    static const char s_delimeter = '-';
+
     struct Group
     {
       uint8_t char_index = 0;
@@ -215,7 +216,7 @@ namespace SequenceId
     return *this;
   }
 
-  Id& Id::next()
+  Id& Id::advance()
   {
     _pimpl->advance();
     return *this;
