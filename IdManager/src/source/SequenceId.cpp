@@ -3,6 +3,7 @@
 #include <string_view>
 #include <algorithm>
 #include <iterator>
+#include <cassert>
 #include "SequenceId.h"
 
 namespace
@@ -38,6 +39,7 @@ namespace
   }
 }
 
+// implementation class
 namespace SequenceId
 {
   using namespace std;
@@ -50,7 +52,7 @@ namespace SequenceId
   public:
     Impl()
     {
-      _id.reserve(MAX_GROUPS);
+      _id.reserve(s_max_groups);
       _id.emplace_back();
     }
 
@@ -71,9 +73,33 @@ namespace SequenceId
       // TODO
     }
 
-    void next()
+    void advance()
     {
-      // TODO
+      // get rightmost grouch
+      auto& last_group = _id.back();
+
+      // if the rightmost group is not max, advance it
+      if (!last_group.is_max()) {
+        last_group.advance();
+      }
+      else
+      {
+        // otherwise, try find first non max group
+        auto first_nonmax_it = find_if(
+          begin(_id),
+          end(_id),
+          [&](const Group& g) { return g.is_max(); }
+        );
+
+        // if found advance it
+        // otherwise add new group at the back
+        if (first_nonmax_it != end(_id)) {
+          first_nonmax_it->advance();
+        }
+        else {
+          _id.emplace_back();
+        }
+      }
     }
 
     string get() const
@@ -84,8 +110,8 @@ namespace SequenceId
       static const char delimeter = '-';
       for (auto it = begin(_id); it != end(_id); ++it)
       {
-        result.push_back(s_allowed_chars[it->index_char]);
-        result.push_back(s_digits[it->index_digit]);
+        result.push_back(s_chars[it->char_index]);
+        result.push_back(s_digits[it->digit_index]);
 
         if (std::next(it) != end(_id))
         {
@@ -99,39 +125,78 @@ namespace SequenceId
     }
 
   private:
-    static constexpr array<char, allowed_size> s_allowed_chars = get_allowed_chars<allowed_size>();
+    static constexpr array<char, allowed_size> s_chars = get_allowed_chars<allowed_size>();
     static constexpr string_view s_digits = "123456789";
-    static constexpr size_t MAX_GROUPS = 10;
+    static const size_t s_last_char_index = s_chars.size() - 1;
+    static const size_t s_last_digit_index = s_digits.size() - 1;
+    static constexpr size_t s_max_groups = 10;
     struct Group
     {
-      uint8_t index_char = 0;
-      uint8_t index_digit = 0;
+      uint8_t char_index = 0;
+      uint8_t digit_index = 0;
+
+      bool is_max() const noexcept
+      {
+        return char_index == s_last_char_index && digit_index == s_last_digit_index;
+      }
+
+      void advance() noexcept
+      {
+        // precondition: group is not max
+        assert(!is_max());
+
+        if (digit_index < s_last_digit_index)
+        {
+          ++digit_index;
+        }
+        else {
+          ++char_index;
+          digit_index = 0;
+        }
+      }
     };
+
+    auto find_first_nonmax() {
+      return find_if(
+        begin(_id), 
+        end(_id), 
+        [&](const Group& g) { return g.is_max(); }
+      );
+    }
 
     vector<Group> _id;
   };
+}
+
+// main class 
+namespace SequenceId
+{
+  using namespace std;
+  using std::array;
+  using std::string_view;
+  using std::vector;
 
   Id::Id()
-      : _pimpl(make_unique<Impl>())
+    : _pimpl(make_unique<Impl>())
   {
   }
 
-  Id::Id(const string &id)
-      : _pimpl(make_unique<Impl>(id))
+  Id::Id(const string& id)
+    : _pimpl(make_unique<Impl>(id))
   {
   }
 
-  Id::Id(const char *id)
-      : _pimpl(make_unique<Impl>(id))
+  Id::Id(const char* id)
+    : _pimpl(make_unique<Impl>(id))
   {
   }
 
-  Id::Id(const Id &other)
-      : _pimpl(make_unique<Impl>(*other._pimpl))
+  Id::Id(const Id& other)
+    : _pimpl(make_unique<Impl>(*other._pimpl))
   {
   }
 
-  Id &Id::operator=(const Id &other)
+  Id& Id::operator=(const Id& other)
   {
     if (this == &other)
     {
@@ -144,15 +209,15 @@ namespace SequenceId
 
   Id::~Id() = default;
 
-  Id &Id::set(const string &s)
+  Id& Id::set(const string& s)
   {
     _pimpl->set(s);
     return *this;
   }
 
-  Id &Id::next()
+  Id& Id::next()
   {
-    _pimpl->next();
+    _pimpl->advance();
     return *this;
   }
 
