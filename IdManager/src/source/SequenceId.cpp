@@ -1,76 +1,41 @@
-﻿// IdManager.cpp : Defines the entry point for the application.
-//
-
-#include <vector>
+﻿#include <vector>
 #include <array>
 #include <string_view>
 #include <algorithm>
 #include <iterator>
 #include "SequenceId.h"
 
-namespace SequenceId
+namespace
 {
   using std::size_t;
+  using std::array;
   using std::string_view;
 
-  template <typename T, size_t N>
-  constexpr size_t getDim(T const (&)[N])
-  {
-    return N;
+  static constexpr string_view forbidden_chars = "DFGJMQV";
+  static constexpr string_view all_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  static constexpr size_t allowed_size = all_chars.size() - forbidden_chars.size();
+
+  constexpr bool contains(char ch, const string_view where) noexcept {
+    return string_view::npos != where.find(ch);
   }
 
-  static constexpr string_view DISALLOWED_CHARS = "DFGJMQV";
-  static constexpr string_view ALL_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  static constexpr string_view DIGITS = "123456789";
-
-  static constexpr char disallowed_chars[] = {'D', 'F', 'G', 'J', 'M', 'Q', 'V'};
-  static constexpr char all_chars[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
-  static constexpr std::array<char, getDim(disallowed_chars)> disallowed_chars_array = {'D', 'F', 'G', 'J', 'M', 'Q', 'V'};
-  static constexpr std::array<char, getDim(all_chars)> all_chars_array = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
-
-  constexpr bool isAllowed(char ch)
+  template <size_t N>
+  constexpr array<char, N> get_allowed_chars() noexcept
   {
-    for (size_t i = 0; i < getDim(disallowed_chars); ++i)
-      if (disallowed_chars[i] == ch)
-      {
-        return false;
-      }
-
-    return true;
-  }
-
-  constexpr size_t get_next_pos(size_t i)
-  {
-    while (!isAllowed(all_chars[i]))
-    {
-      ++i;
-    }
-
-    return i; // for example
-  }
-
-  template <int N>
-
-  constexpr std::array<char, N> generate_allowed_chars_array()
-  {
-    std::array<char, N> arr{};
-
-    size_t j = 0;
+    std::array<char, N> allowed_chars{};
+    size_t curr = 0;
     size_t i = 0;
 
-    while (j < N)
+    while (curr < N)
     {
-      i = get_next_pos(i);
-      arr[j++] = all_chars[get_next_pos(i)];
-      ++i;
+      while (contains(all_chars[i], forbidden_chars)) {
+        ++i;
+      }
+      allowed_chars[curr++] = all_chars[i++];
     }
 
-    return arr;
+    return allowed_chars;
   }
-
-  static constexpr size_t allowed_chars_dim = getDim(all_chars) - getDim(disallowed_chars);
-
-  static constexpr std::array<char, allowed_chars_dim> allow = generate_allowed_chars_array<allowed_chars_dim>();
 }
 
 namespace SequenceId
@@ -134,8 +99,8 @@ namespace SequenceId
     }
 
   private:
-    static constexpr array<char, allowed_chars_dim> s_allowed_chars = generate_allowed_chars_array<allowed_chars_dim>();
-    static constexpr array<char, 9> s_digits = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    static constexpr array<char, allowed_size> s_allowed_chars = get_allowed_chars<allowed_size>();
+    static constexpr string_view s_digits = "123456789";
     static constexpr size_t MAX_GROUPS = 10;
     struct Group
     {

@@ -13,7 +13,6 @@ TEST_CASE("Default value")
     CHECK(id.get() == "A1");
 }
 
-
 TEST_CASE("Next digit (1)")
 {
     Id id = "A1";
