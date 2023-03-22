@@ -1,8 +1,6 @@
 ﻿// IdManager.cpp : Defines the entry point for the application.
 //
 
-#include <string>
-#include <array>
 #include "SequenceId.h"
 
 namespace SequenceId
@@ -70,7 +68,7 @@ namespace SequenceId
   static constexpr std::array<char, allowed_chars_dim> allow = generate_allowed_chars_array<allowed_chars_dim>();
 }
 
-namespace SequenceIdls
+namespace SequenceId
 {
   using namespace std;
 

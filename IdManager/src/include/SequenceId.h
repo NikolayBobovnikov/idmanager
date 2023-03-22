@@ -5,11 +5,9 @@
 
 #include <string>
 #include <memory>
-#include "IId.h"
 
 namespace SequenceId
 {
-  using std::array;
   using std::string;
   using std::unique_ptr;
 
@@ -31,8 +29,6 @@ namespace SequenceId
     string get() const;
 
   private:
-    // static const size_t m_chars_count;
-    // static const array<char, m_chars_count> m_allowed_chars;
     class Impl;
     unique_ptr<Impl> _pimpl;
   };
