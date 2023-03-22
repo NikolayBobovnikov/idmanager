@@ -6,18 +6,20 @@
 
 using namespace SequenceId;
 
+
 TEST_CASE("Default value")
 {
     Id id;
     CHECK(id.get() == "A1");
 }
 
+
 TEST_CASE("Next digit (1)")
 {
     Id id = "A1";
     id.next();
-
-    CHECK(id.get() == "A2");
+    auto s = id.get();
+    CHECK(s == "A2");
 }
 
 TEST_CASE("Next digit (1) + assignment")

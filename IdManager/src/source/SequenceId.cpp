@@ -114,7 +114,7 @@ namespace SequenceId
     string get() const
     {
       string result;
-      result.reserve(_id.size() * 3 - 1); // 3 elements (char,  digit, delimeter) per group
+      result.reserve(_id.size() * 3); // 3 elements (char,  digit, delimeter) per group
 
       static const char delimeter = '-';
       for (auto it = begin(_id); it != end(_id); ++it)
@@ -128,8 +128,7 @@ namespace SequenceId
         }
       }
 
-      // remove last
-      result.pop_back();
+      result.shrink_to_fit(); // one group possibly unnecessary
 
       return result;
     }
@@ -143,6 +142,7 @@ namespace SequenceId
       uint8_t index_char = 0;
       uint8_t index_digit = 0;
     };
+
     vector<Group> _id;
   };
 
