@@ -79,23 +79,42 @@ namespace SequenceId
 
     void set(const string &id)
     {
+      static const string incorrect_format_msg = "Incorrect format of the identifier. ";
+      char current_char;
+      char current_digit;
+
       for (auto it = begin(id); it != end(id); ++it)
       {
+        // skip delimeter
         if (*it == s_delimeter)
         {
           ++it;
+          continue;
         }
 
-        const auto &ch = *it;
-        if (!contains(ch, s_chars))
+        // first token should be char
+        current_char = *it;
+        if (!contains(current_char, s_chars))
         {
-          throw invalid_argument("Incorrect format of the identifier. Char is not allowed: " + ch);
+          throw invalid_argument(incorrect_format_msg + "Char is not allowed: " + current_char);
         }
 
-        if (!contains(ch, s_digits))
+        // go to next token, should exist
+        ++it;
+        if (it == end(id))
         {
-          throw invalid_argument("Incorrect format of the identifier. Char is not allowed: " + ch);
+          throw invalid_argument(incorrect_format_msg + "Digit should follow the characther.");
         }
+
+        // and be integer
+        current_digit = *it;
+        if (!contains(current_digit, s_digits))
+        {
+          throw invalid_argument(incorrect_format_msg + "Digit in the range 1..9 is expected, but got " + current_digit);
+        }
+
+        // after data is validated, add group with positions of char and digit to the identifier
+        _groups.emplace_back(indexof(current_char, s_chars), indexof(current_digit, s_digits));
       }
     }
 
