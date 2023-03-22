@@ -4,51 +4,36 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include "IId.h"
 
-namespace {
-  /*
-#include <array>
-
-  using ResultT = int;
-  constexpr ResultT f(int i)
-  {
-    return i * 2;
-  }
-
-  constexpr auto LUT = []
-  {
-    constexpr auto LUT_Size = 1024;
-    std::array<ResultT, LUT_Size> arr = {};
-
-    for (int i = 0; i < LUT_Size; ++i)
-    {
-      arr[i] = f(i);
-    }
-
-    return arr;
-  }();
-
-  static_assert(LUT[100] == 200);
-  */
-}
-
-namespace SequenceId {
+namespace SequenceId
+{
+  using std::array;
   using std::string;
+  using std::unique_ptr;
 
-
-  class Id{
+  class Id
+  {
   public:
-    Id(); // default
-    Id(const string& id); // implicit
+    Id();               // default
+    Id(const string &); // implicit
+    Id(const char *);   // implicit
+    ~Id();              // need for pimpl, default in cpp
 
-    Id& set(const string&);
-    Id& next();
+    Id(const Id &);
+    Id &operator=(const Id &);
+    Id(Id &&) = default;
+    Id &operator=(Id &&) = default;
 
-    operator string() const;
+    Id &set(const string &);
+    Id &next();
+    string get() const;
 
   private:
-    std::string _id;
+    // static const size_t m_chars_count;
+    // static const array<char, m_chars_count> m_allowed_chars;
+    class Impl;
+    unique_ptr<Impl> _pimpl;
   };
-
 }
