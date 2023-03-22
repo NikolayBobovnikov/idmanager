@@ -52,8 +52,8 @@ namespace SequenceId
   public:
     Impl()
     {
-      _id.reserve(s_max_groups);
-      _id.emplace_back();
+      _groups.reserve(s_max_groups);
+      _groups.emplace_back();
     }
 
     Impl(const Impl &) = default;
@@ -76,7 +76,7 @@ namespace SequenceId
     void advance()
     {
       // get rightmost grouch
-      auto& last_group = _id.back();
+      auto& last_group = _groups.back();
 
       // if the rightmost group is not max, advance it
       if (!last_group.is_max()) {
@@ -86,18 +86,18 @@ namespace SequenceId
       {
         // otherwise, try find first non max group
         auto first_nonmax_it = find_if(
-          begin(_id),
-          end(_id),
+          begin(_groups),
+          end(_groups),
           [&](const Group& g) { return g.is_max(); }
         );
 
         // if found advance it
         // otherwise add new group at the back
-        if (first_nonmax_it != end(_id)) {
+        if (first_nonmax_it != end(_groups)) {
           first_nonmax_it->advance();
         }
         else {
-          _id.emplace_back();
+          _groups.emplace_back();
         }
       }
     }
@@ -105,21 +105,21 @@ namespace SequenceId
     string get() const
     {
       string result;
-      result.reserve(_id.size() * 3); // 3 elements (char,  digit, delimeter) per group
+      result.reserve(_groups.size() * 3); // reserve for 3 elements (char,  digit, delimeter) per group
 
       static const char delimeter = '-';
-      for (auto it = begin(_id); it != end(_id); ++it)
+      for (auto it = begin(_groups); it != end(_groups); ++it)
       {
         result.push_back(s_chars[it->char_index]);
         result.push_back(s_digits[it->digit_index]);
 
-        if (std::next(it) != end(_id))
+        if (std::next(it) != end(_groups))
         {
           result.push_back(delimeter);
         }
       }
 
-      result.shrink_to_fit(); // one group possibly unnecessary
+      result.shrink_to_fit(); // space for one delimeter possibly redundant
 
       return result;
     }
@@ -158,13 +158,13 @@ namespace SequenceId
 
     auto find_first_nonmax() {
       return find_if(
-        begin(_id), 
-        end(_id), 
+        begin(_groups), 
+        end(_groups), 
         [&](const Group& g) { return g.is_max(); }
       );
     }
 
-    vector<Group> _id;
+    vector<Group> _groups;
   };
 }
 
