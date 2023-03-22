@@ -21,6 +21,11 @@ namespace
   }
 
   template <size_t N>
+  constexpr bool contains(char ch, const array<char, N> where) noexcept {
+    return end(where) != std::find(begin(where), end(where), ch);
+  }
+
+  template <size_t N>
   constexpr array<char, N> get_allowed_chars() noexcept
   {
     std::array<char, N> allowed_chars{};
@@ -46,6 +51,7 @@ namespace SequenceId
   using std::array;
   using std::string_view;
   using std::vector;
+  using std::exception;
 
   class Id::Impl
   {
@@ -68,9 +74,22 @@ namespace SequenceId
       // TODO
     }
 
-    void set(const string &)
+    void set(const string &id)
     {
-      // TODO
+      for (auto it = begin(id); it != end(id); ++it) {
+        if (*it == s_delimeter) {
+          ++it;
+        }
+
+        const auto& ch = *it;
+        if (!contains(ch, s_chars)) {
+          throw exception("Incorrect format of the identifier. Char is not allowed: " + ch);
+        }
+
+        if (!contains(ch, s_digits)) {
+          throw exception("Incorrect format of the identifier. Char is not allowed: " + ch);
+        }
+      }
     }
 
     void advance()
